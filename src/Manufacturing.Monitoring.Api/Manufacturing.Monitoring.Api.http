@@ -1,0 +1,6 @@
+@Manufacturing.Monitoring.Api_HostAddress = http://localhost:5134
+
+GET {{Manufacturing.Monitoring.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
