@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ITelemetryRepository, InMemoryTelemetryRepository>();
 builder.Services.AddHostedService<TelemetrySimulationService>();
 builder.Services.AddScoped<IMachineMetricsService, MachineMetricsService>();
+builder.Services.AddScoped<IMachineHistoryService, MachineHistoryService>();
 var app = builder.Build();
 
 // Configure pipeline

@@ -4,17 +4,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Manufacturing.Monitoring.Api.Controllers;
 
-[ApiController]
 [Route("api/machines")]
 public sealed class MachinesController : ControllerBase
 {
     private readonly IMachineMetricsService _metrics;
+    private readonly IMachineHistoryService _history;
 
     public MachinesController(IMachineMetricsService metrics)
     {
         _metrics = metrics;
     }
-
+    public MachinesController(
+        IMachineMetricsService metrics,
+        IMachineHistoryService history)
+    {
+        _metrics = metrics;
+        _history = history;
+    }
     [HttpGet("{machineId}/status")]
     public async Task<IActionResult> GetStatus(string machineId)
     {
@@ -29,7 +35,19 @@ public sealed class MachinesController : ControllerBase
             Status = status.ToString()
         });
     }
+    [HttpGet("{machineId}/telemetry")]
+    public async Task<ActionResult<IEnumerable<TelemetryEventDto>>> GetTelemetry(
+        string machineId,
+        [FromQuery] DateTime fromUtc,
+        [FromQuery] DateTime toUtc)
+    {
+        var events = await _history.GetTelemetryAsync(machineId, fromUtc, toUtc);
 
+        return Ok(events.Select(e => new TelemetryEventDto(
+            e.MachineId,
+            e.Status.ToString(),
+            e.TimestampUtc)));
+    }
     [HttpGet("{machineId}/metrics")]
     public async Task<ActionResult<MachineMetricsDto>> GetMetrics(
         string machineId,
@@ -55,5 +73,19 @@ public sealed class MachinesController : ControllerBase
             uptime,
             downtime,
             currentDowntime));
+    }
+    [HttpGet("{machineId}/timeline")]
+    public async Task<ActionResult<IEnumerable<StatusTimelineDto>>> GetTimeline(
+        string machineId,
+        [FromQuery] DateTime fromUtc,
+        [FromQuery] DateTime toUtc)
+    {
+        var timeline = await _history.GetStatusTimelineAsync(machineId, fromUtc, toUtc);
+
+        return Ok(timeline.Select(t => new StatusTimelineDto(
+            t.status,
+            t.from,
+            t.to,
+            t.to - t.from)));
     }
 }
