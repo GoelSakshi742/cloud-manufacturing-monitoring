@@ -26,4 +26,18 @@ The system does **not integrate with real hardware**, but it is structured as if
 
 ## Architecture Overview
 
-The system follows a **clean, layered architecture** to ensure separation of concerns and future scalability.
+The system follows a clean, layered architecture that separates concerns and supports future scalability.
+
+```mermaid
+flowchart LR
+    SIM["Telemetry Simulator<br/>(Background Service)"]
+    API["API Layer<br/>ASP.NET Core Web API"]
+    APP["Application Layer<br/>Metrics & History Services"]
+    DOMAIN["Domain Layer<br/>Entities & Enums"]
+    REPO["Telemetry Repository<br/>(In‑Memory / Pluggable)"]
+
+    SIM --> REPO
+    API --> APP
+    APP --> REPO
+    APP --> DOMAIN
+    REPO --> DOMAIN
