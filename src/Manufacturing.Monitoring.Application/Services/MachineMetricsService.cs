@@ -14,11 +14,10 @@ public sealed class MachineMetricsService : IMachineMetricsService
 
     public async Task<MachineStatus?> GetCurrentStatusAsync(string machineId)
     {
-        var now = DateTime.UtcNow;
         var events = await _repository.GetByMachineAsync(
             machineId,
-            now.AddHours(-24),
-            now);
+            DateTime.MinValue,
+            DateTime.UtcNow);
 
         return events.LastOrDefault()?.Status;
     }
@@ -31,16 +30,16 @@ public sealed class MachineMetricsService : IMachineMetricsService
 
         var events = await _repository.GetByMachineAsync(machineId, from, now);
 
-        if (!events.Any())
+        if (events.Count == 0)
             return (TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero);
 
         TimeSpan uptime = TimeSpan.Zero;
         TimeSpan downtime = TimeSpan.Zero;
 
-        var lastStatus = events.First().Status;
-        var lastTimestamp = from;
+        var lastStatus = events[0].Status;
+        var lastTimestamp = events[0].TimestampUtc;
 
-        foreach (var evt in events)
+        foreach (var evt in events.Skip(1))
         {
             var duration = evt.TimestampUtc - lastTimestamp;
 
@@ -53,15 +52,18 @@ public sealed class MachineMetricsService : IMachineMetricsService
             lastTimestamp = evt.TimestampUtc;
         }
 
+        // Extend last known state to now
         var tailDuration = now - lastTimestamp;
+
         if (lastStatus == MachineStatus.Running)
             uptime += tailDuration;
         else
             downtime += tailDuration;
 
-        var currentDowntime = lastStatus == MachineStatus.Stopped
-            ? now - lastTimestamp
-            : TimeSpan.Zero;
+        var currentDowntime =
+            lastStatus == MachineStatus.Stopped
+                ? tailDuration
+                : TimeSpan.Zero;
 
         return (uptime, downtime, currentDowntime);
     }
