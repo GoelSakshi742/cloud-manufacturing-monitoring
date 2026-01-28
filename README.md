@@ -1,43 +1,54 @@
-# Cloud‑Enabled Manufacturing Monitoring System
-*(Simulated Telemetry & Real‑Time Metrics)*
+# 🏭 Cloud Manufacturing Monitoring System
 
-## Overview
-
-This project is a **cloud‑ready backend system** that simulates industrial machine telemetry and computes **real‑time and historical uptime/downtime metrics** on demand.
-
-It is designed using **enterprise backend patterns** commonly found in manufacturing, oil & gas, and industrial IoT systems.
-
-The system does **not integrate with real hardware**, but it is structured as if it could, making it suitable for demonstrating **professional backend engineering skills**.
+A clean‑architecture based **ASP.NET Core Web API** that simulates manufacturing machine telemetry, stores events in memory, computes machine uptime/downtime metrics, and exposes insights via REST APIs.
 
 ---
 
-## Key Features
+## 📌 Key Features
 
-- ✅ Simulated machine telemetry (Running / Stopped)
-- ✅ Event‑driven, time‑series data modeling
-- ✅ Dynamic uptime & downtime calculation (no pre‑aggregation)
-- ✅ Rolling time windows (e.g., last 30 / 60 minutes)
-- ✅ Current downtime streak tracking
-- ✅ Clean layered architecture
-- ✅ REST API with Swagger
-- ✅ Unit‑tested business logic
+- ✅ Real‑time telemetry simulation
+- ✅ Machine uptime & downtime calculation
+- ✅ Status timeline generation
+- ✅ Clean Architecture (API, Application, Domain, Infrastructure)
+- ✅ In‑memory repository for fast testing
+- ✅ Fully unit‑tested business logic
+- ✅ Swagger/OpenAPI support
 
 ---
 
-## Architecture Overview
+## 🧱 Solution Architecture
 
-The system follows a clean, layered architecture that separates concerns and supports future scalability.
+The solution follows **Clean Architecture**, ensuring separation of concerns, testability, and scalability.
+
+### 🔷 Layer Responsibilities
+
+| Layer | Responsibility |
+|-----|---------------|
+| **API** | HTTP endpoints, DTO mapping, request validation |
+| **Application** | Business logic, use cases, interfaces |
+| **Domain** | Core entities, enums, business rules |
+| **Infrastructure** | Data storage, simulations, external services |
+| **Tests** | Unit tests with fake repositories |
+
+---
+
+## 🧩 Architecture Diagram (Mermaid)
 
 ```mermaid
-flowchart LR
-    SIM["Telemetry Simulator<br/>(Background Service)"]
-    API["API Layer<br/>ASP.NET Core Web API"]
-    APP["Application Layer<br/>Metrics & History Services"]
-    DOMAIN["Domain Layer<br/>Entities & Enums"]
-    REPO["Telemetry Repository<br/>(In‑Memory / Pluggable)"]
+flowchart TB
 
-    SIM --> REPO
-    API --> APP
-    APP --> REPO
-    APP --> DOMAIN
-    REPO --> DOMAIN
+Client["Client / Browser / API Consumer"]
+
+Client --> API["API Layer<br/>(MachinesController)"]
+
+API --> App["Application Layer<br/>(Services & Interfaces)"]
+
+App --> Domain["Domain Layer<br/>(Entities & Enums)"]
+
+App --> Infra["Infrastructure Layer<br/>(Repositories & Simulation)"]
+
+Infra --> Domain
+
+Infra --> Store["In‑Memory Telemetry Store"]
+
+Infra --> Simulator["TelemetrySimulationService<br/>(Background Worker)"]
