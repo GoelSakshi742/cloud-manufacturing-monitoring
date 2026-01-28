@@ -32,6 +32,40 @@ The solution follows **Clean Architecture**, ensuring separation of concerns, te
 
 ---
 
+## 🧩 Visual Flow Diagram
+```mermaid
+flowchart TD
+
+Start["Application Start"]
+
+Start --> Program["Program.cs<br/>Configure Services & Middleware"]
+
+Program --> Repo["InMemoryTelemetryRepository<br/>(ITelemetryRepository)"]
+Program --> Sim["TelemetrySimulationService<br/>(Background Worker)"]
+
+Sim -->|Every 10 seconds| Event["Generate TelemetryEvent"]
+Event --> Repo
+
+Client["API Client"]
+
+Client --> Controller["MachinesController<br/>(API Layer)"]
+
+Controller --> Metrics["MachineMetricsService<br/>(Application Layer)"]
+Controller --> History["MachineHistoryService<br/>(Application Layer)"]
+
+Metrics --> Repo
+History --> Repo
+
+Repo --> Domain["Domain Objects<br/>(TelemetryEvent, MachineStatus)"]
+
+Metrics --> Response["Metrics / Status Result"]
+History --> Response
+
+Response --> Controller
+Controller --> Client
+```
+---
+
 ## 🧩 Architecture Diagram
 
 ```mermaid
